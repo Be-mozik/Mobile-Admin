@@ -26,8 +26,7 @@ export const camQr = async (id) => {
         if(!response.ok){
             throw new Error('Échec de la requête');
         }
-        const jsonResponse = await response.json();
-        return jsonResponse;
+        return response;
     } catch (error) {
         console.error(error, "Erreur lors de l'appel à l'API");
         throw error;
