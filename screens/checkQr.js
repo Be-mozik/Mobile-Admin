@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Alert, StyleSheet, View, Text } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { camQr } from "../api/callApi";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/SimpleLineIcons';
 
 const CheckQr = () => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -23,7 +25,8 @@ const CheckQr = () => {
         Alert.alert("Erreur", result.error);
         return;
       }
-      Alert.alert('Success', JSON.stringify(result));
+      await AsyncStorage.setItem('ticket',result);
+
     } catch (error) {
       Alert.alert('Erreur', 'Échec de la recherche du ticket.');
       console.error(error);
@@ -41,6 +44,7 @@ const CheckQr = () => {
 
   return (
     <View style={styles.background}>
+      <Icon name="logout" size={30} color="white" style={styles.icon} />
       <View style={styles.cameraContainer}>
         <BarCodeScanner
           onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
@@ -73,6 +77,11 @@ const styles = StyleSheet.create({
     fontWeight: "300",
     fontSize: 15,
     marginTop: 10,
+  },
+  icon: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
   },
 });
 

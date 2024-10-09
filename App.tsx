@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
-import CheckQr from './screens/checkQr';
+import ResultQr from './screens/resultQr';
 
 export default function App() {
   return (
-    <CheckQr></CheckQr>
+    <ResultQr></ResultQr>
   );
 }
 
