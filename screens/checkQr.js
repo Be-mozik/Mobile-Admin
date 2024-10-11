@@ -2,49 +2,88 @@ import React, { useState, useEffect } from 'react';
 import { Alert, StyleSheet, View, Text } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { camQr } from "../api/callApi";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/SimpleLineIcons';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const CheckQr = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
+  const [ticket, setTicket] = useState(null);
+  const navigation = useNavigation();
+
+  const handleDeco = async () => {
+      try {
+        await AsyncStorage.removeItem("userToken");
+        navigation.replace('Login');        
+      } catch (error) {
+        console.error(error);
+      }
+  }
+
+  const requestCameraPermission = async () => {
+    const { status } = await BarCodeScanner.requestPermissionsAsync();
+    console.log('Permission status:', status);
+    setHasPermission(status === 'granted');
+  };
 
   useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
+    requestCameraPermission();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('Screen focused, resetting scan state');
+      setScanned(false);
+      setTicket(null);
+      requestCameraPermission();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const handleBarCodeScanned = async ({ data }) => {
+    if (scanned) {
+      console.log('Already scanned, ignoring this scan');
+      return;
+    }
     setScanned(true);
+    console.log('Scanning data:', data);
     try {
       const response = await camQr(data);
       const result = await response.json();
+      console.log('API response:', result);
       if (result.error) {
         Alert.alert("Erreur", result.error);
+        console.log('Error from API:', result.error);
+        setScanned(false);
         return;
       }
-      await AsyncStorage.setItem('ticket',result);
-
+      setTicket(result);
+      navigation.navigate("Result", { ticket: result });
+      console.log('Ticket received:', result);
+      setTimeout(() => {
+        setScanned(false);
+      }, 2000);
     } catch (error) {
       Alert.alert('Erreur', 'Échec de la recherche du ticket.');
-      console.error(error);
-    } finally {
+      console.error('Scan error:', error);
       setScanned(false);
     }
   };
 
   if (hasPermission === null) {
+    console.log('Requesting camera permission...');
     return <Text>Demande de permission...</Text>;
   }
   if (hasPermission === false) {
+    console.log('Camera permission denied');
     return <Text>Accès caméra refusé</Text>;
   }
 
   return (
     <View style={styles.background}>
-      <Icon name="logout" size={30} color="white" style={styles.icon} />
+      <Icon name="logout" size={30} color="white" style={styles.icon} onPress={handleDeco} />
       <View style={styles.cameraContainer}>
         <BarCodeScanner
           onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
@@ -67,7 +106,7 @@ const styles = StyleSheet.create({
     width: '80%',
     height: '50%',
     overflow: 'hidden',
-    borderRadius: 15,
+    borderRadius: 20,
   },
   camera: {
     flex: 1,

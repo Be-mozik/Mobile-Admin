@@ -32,3 +32,16 @@ export const camQr = async (id) => {
         throw error;
     }
 };
+
+export const validerBillet = async (token) => {
+    try {
+        const response = await fetch(`${BASE_URL}/achat/modifier/${token}`);
+        if(!response.ok){
+            throw new Error('Échec de la requête');
+        }
+        return response;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};

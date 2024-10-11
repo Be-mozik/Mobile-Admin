@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { connexion } from '../api/callApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { 
     View,
     StyleSheet,
@@ -12,9 +13,9 @@ import {
 } from 'react-native';
 
 const LoginScreen = () => {
-    const [mail, setMail] = useState("");
-    const [mdp, setMdp] = useState("");
-
+    const [mail, setMail] = useState("jean@example.com");
+    const [mdp, setMdp] = useState("monMotDePasse123");
+    const navigation = useNavigation();
     const handleLogin = async () => {
         if (!mail || !mdp) {
             Alert.alert("Erreur", "Veuillez remplir tous les champs.");
@@ -29,6 +30,7 @@ const LoginScreen = () => {
             }
             if (rep.token) {
                 await AsyncStorage.setItem('userToken',rep.token);
+                navigation.replace("Check");
             }
         } catch (error) {
             Alert.alert("Échec de la connexion", "Échec de la connexion.");
