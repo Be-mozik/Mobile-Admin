@@ -1,10 +1,10 @@
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
 import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import React from 'react';
 import { useRoute, useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { validerBillet } from '../api/callApi';
 
 const ResultQr = () => {
     const route = useRoute();
@@ -23,6 +23,21 @@ const ResultQr = () => {
     const handleReturn = () => {
         navigation.replace('Check');
     };
+
+    const handleValider = async () => {
+        try {
+            const response = await validerBillet(ticket.tokenachat);
+            if (response && response.success) {
+                Alert.alert('Succès', response.success);
+                navigation.replace('Check');
+            } else {
+                Alert.alert('Erreur', 'La validation du billet a échoué.');
+            }
+        } catch (error) {
+            console.error('Erreur lors de la validation du billet : ', error);
+            Alert.alert('Erreur', 'Une erreur est survenue lors de la validation du billet.');
+        }
+    };    
 
     return (
         <View style={styles.background}>
@@ -57,7 +72,7 @@ const ResultQr = () => {
                 </View>
                 <View style={styles.btn_container}>
                     {ticket ? (
-                        <TouchableOpacity style={styles.btn}>
+                        <TouchableOpacity style={styles.btn} onPress={handleValider}>
                             <Text style={styles.text_btn}>Valider</Text>
                         </TouchableOpacity>
                     ) : (

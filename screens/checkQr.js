@@ -24,7 +24,6 @@ const CheckQr = () => {
 
   const requestCameraPermission = async () => {
     const { status } = await BarCodeScanner.requestPermissionsAsync();
-    console.log('Permission status:', status);
     setHasPermission(status === 'granted');
   };
 
@@ -34,7 +33,6 @@ const CheckQr = () => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      console.log('Screen focused, resetting scan state');
       setScanned(false);
       setTicket(null);
       requestCameraPermission();
@@ -44,40 +42,34 @@ const CheckQr = () => {
 
   const handleBarCodeScanned = async ({ data }) => {
     if (scanned) {
-      console.log('Already scanned, ignoring this scan');
       return;
     }
     setScanned(true);
-    console.log('Scanning data:', data);
     try {
       const response = await camQr(data);
       const result = await response.json();
-      console.log('API response:', result);
       if (result.error) {
         Alert.alert("Erreur", result.error);
-        console.log('Error from API:', result.error);
-        setScanned(false);
+        setTimeout(() => {
+          setScanned(false);
+        }, 2000);
         return;
       }
       setTicket(result);
       navigation.navigate("Result", { ticket: result });
-      console.log('Ticket received:', result);
       setTimeout(() => {
         setScanned(false);
       }, 2000);
     } catch (error) {
       Alert.alert('Erreur', 'Échec de la recherche du ticket.');
-      console.error('Scan error:', error);
       setScanned(false);
     }
   };
 
   if (hasPermission === null) {
-    console.log('Requesting camera permission...');
     return <Text>Demande de permission...</Text>;
   }
   if (hasPermission === false) {
-    console.log('Camera permission denied');
     return <Text>Accès caméra refusé</Text>;
   }
 

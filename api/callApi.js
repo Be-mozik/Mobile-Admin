@@ -35,11 +35,17 @@ export const camQr = async (id) => {
 
 export const validerBillet = async (token) => {
     try {
-        const response = await fetch(`${BASE_URL}/achat/modifier/${token}`);
+        const response = await fetch(`${BASE_URL}/achat/modifier/${token}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
         if(!response.ok){
             throw new Error('Échec de la requête');
         }
-        return response;
+        const jsonResponse = await response.json();
+        return jsonResponse;
     } catch (error) {
         console.error(error);
         throw error;
