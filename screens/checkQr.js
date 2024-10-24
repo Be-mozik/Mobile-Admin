@@ -41,9 +41,6 @@ const CheckQr = () => {
   }, [navigation]);
 
   const handleBarCodeScanned = async ({ data }) => {
-    if (scanned) {
-      return;
-    }
     setScanned(true);
     try {
       const response = await camQr(data);
