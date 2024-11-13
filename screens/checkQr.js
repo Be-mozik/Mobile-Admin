@@ -49,7 +49,7 @@ const CheckQr = () => {
         Alert.alert("Erreur", result.error);
         setTimeout(() => {
           setScanned(false);
-        }, 2000);
+        }, 5000);
         return;
       }
       setTicket(result);

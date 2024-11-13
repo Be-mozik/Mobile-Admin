@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const BASE_URL = 'http://10.0.2.2:5000/api';
 
 export const connexion = async (data) => {
@@ -22,9 +24,16 @@ export const connexion = async (data) => {
 
 export const camQr = async (id) => {
     try {
-        const response = await fetch(`${BASE_URL}/achat/check/billet/${id}`);
+        const token = await AsyncStorage.getItem('userToken');
+        const response = await fetch(`${BASE_URL}/achat/check/billet/${id}`,{
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
         if(!response.ok){
-            throw new Error('Échec de la requête');
+            throw new Error('Échec de la requête',response);
         }
         return response;
     } catch (error) {
@@ -35,9 +44,11 @@ export const camQr = async (id) => {
 
 export const validerBillet = async (token) => {
     try {
+        const tokenUser = await AsyncStorage.getItem('userToken');
         const response = await fetch(`${BASE_URL}/achat/modifier/${token}`, {
             method: 'PUT',
             headers: {
+                'Authorization': `Bearer ${tokenUser}`,
                 'Content-Type': 'application/json',
             },
         });
